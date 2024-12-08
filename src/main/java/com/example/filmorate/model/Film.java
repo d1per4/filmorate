@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Film {
-    private Long id;
+    private Integer id;
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
     @Size(max = 200, message = "Максимальная длина описания — 200 символов")
@@ -21,11 +21,11 @@ public class Film {
     @Positive
     private String duration;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
