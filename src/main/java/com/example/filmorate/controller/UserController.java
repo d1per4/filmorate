@@ -34,30 +34,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public User update(@PathVariable Integer id, @Valid @RequestBody User user) {
-        User updateUser = users.get(id);
+    public User update(@Valid @RequestBody User user) {
+        User updateUser = users.get(user.getId());
 
         if (updateUser == null) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        if (user.getName() != null && !user.getName().isBlank()) {
-            updateUser.setName(user.getName());
-        }
-        if (user.getEmail() != null) {
-            updateUser.setEmail(user.getEmail());
-        }
-        if (user.getLogin() != null) {
-            updateUser.setLogin(user.getLogin());
-        }
-        if (user.getName() != null) {
-            updateUser.setName(user.getName());
-        }
-        if (user.getBirthday() != null) {
-            updateUser.setBirthday(user.getBirthday());
-        }
-
-        users.put(id, updateUser);
+        users.put(user.getId(), updateUser);
 
         return updateUser;
     }
