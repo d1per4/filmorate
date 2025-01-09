@@ -18,9 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FilmService {
 
-    @Autowired
     private final FilmStorage filmStorage;
-
     private final UserStorage userStorage;
 
     public Film create(Film film){
