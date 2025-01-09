@@ -5,21 +5,19 @@ import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.User;
 import com.example.filmorate.storage.FilmStorage;
-import com.example.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final UserService userService;
 
     public Film create(Film film){
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
@@ -43,29 +41,28 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId){
-        if(filmStorage.findById(filmId).isEmpty()){
-            throw new NotFoundException("Фильм не найден");
-        }
+        Film film = findById(filmId);
+        User user = userService.findById(userId);
 
-        if(userStorage.findById(userId).isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        filmStorage.addLike(filmId, userId);
+        filmStorage.addLike(film.getId(), user.getId());
     }
 
     public void removeLike(int filmId, int userId){
-        if(filmStorage.findById(filmId).isEmpty()){
-            throw new NotFoundException("Фильм не найден");
-        }
+        Film film = findById(filmId);
+        User user = userService.findById(userId);
 
-        if(userStorage.findById(userId).isEmpty()){
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        filmStorage.removeLike(filmId, userId);
+        filmStorage.removeLike(film.getId(), user.getId());
     }
 
 
+    public List<Film> getPopularFilms(Integer count) {
 
+        List<Film> films = new ArrayList<>(findAll().stream().toList());
+
+        films.sort(Comparator.comparing((Film film) -> film.getLikes().size()).reversed());
+
+        return films.stream()
+                .limit(Objects.requireNonNullElse(count, 10))
+                .collect(Collectors.toList());
+    }
 }

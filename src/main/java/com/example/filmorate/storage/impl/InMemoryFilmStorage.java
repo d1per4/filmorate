@@ -33,11 +33,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findAllPopular() {
-        return List.of();
-    }
-
-    @Override
     public Optional<Film> findById(int filmId){
         return Optional.ofNullable(films.get(filmId));
     }

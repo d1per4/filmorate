@@ -18,4 +18,10 @@ public class ErrorHandler {
     public ErrorResponse handleLocalDate(LocalDateException e){
         return new ErrorResponse("Неверная дата", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUserExists(UserAlreadyExistsException e){
+        return new ErrorResponse("Пользователь уже существует", e.getMessage());
+    }
 }

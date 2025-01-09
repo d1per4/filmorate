@@ -47,4 +47,9 @@ public class FilmController {
         filmService.removeLike(film_id, id);
     }
 
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(required = false) Integer count){
+        return filmService.getPopularFilms(count);
+    }
+
 }

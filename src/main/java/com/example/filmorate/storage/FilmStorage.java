@@ -17,8 +17,6 @@ public interface FilmStorage {
 
     Collection<Film> findAll();
 
-    Collection<Film> findAllPopular();
-
     Optional<Film> findById(int filmId);
 
     void addLike(int filmId, int userId);

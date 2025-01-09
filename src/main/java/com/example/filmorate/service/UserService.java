@@ -1,15 +1,14 @@
 package com.example.filmorate.service;
 
 import com.example.filmorate.exception.NotFoundException;
+import com.example.filmorate.exception.UserAlreadyExistsException;
 import com.example.filmorate.model.User;
 import com.example.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +48,7 @@ public class UserService {
             update(user);
             update(friendUser);
         } else {
-            throw new IllegalArgumentException("Пользователь уже в друзьях");
+            throw new UserAlreadyExistsException("Пользователь уже добавлен в друзья");
         }
 
     }
@@ -57,6 +56,26 @@ public class UserService {
     public List<User> findAllFriends(int userId) {
         return findById(userId).getFriends()
                 .stream()
+                .map(this::findById)
+                .toList();
+    }
+
+    public void deleteFriend(int userId, int friendId) {
+        User user = findById(userId);
+        User friendUser = findById(friendId);
+        if(user.getFriends().contains(friendId)){
+            user.getFriends().remove(friendUser.getId());
+            friendUser.getFriends().remove(user.getId());
+            update(user);
+            update(friendUser);
+        }
+    }
+
+    public List<User> getCommonFriends(int id, int otherId) {
+        Set<Integer> friends = new HashSet<>(findById(id).getFriends());
+        friends.retainAll(findById(otherId).getFriends());
+
+        return friends.stream()
                 .map(this::findById)
                 .toList();
     }
