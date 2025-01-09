@@ -30,9 +30,21 @@ public class FilmController {
         return filmService.create(film);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
+    }
+
+    @PutMapping("/{film_id}/like/{id}")
+    public void addLike(@PathVariable int film_id,
+                        @PathVariable int id){
+        filmService.addLike(film_id, id);
+    }
+
+    @DeleteMapping("/{film_id}/like/{id}")
+    public void removeLike(@PathVariable int film_id,
+                           @PathVariable int id){
+        filmService.removeLike(film_id, id);
     }
 
 }

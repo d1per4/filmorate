@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface FilmStorage {
 
@@ -17,4 +18,10 @@ public interface FilmStorage {
     Collection<Film> findAll();
 
     Collection<Film> findAllPopular();
+
+    Optional<Film> findById(int filmId);
+
+    void addLike(int filmId, int userId);
+
+    void removeLike(int filmId, int userId);
 }

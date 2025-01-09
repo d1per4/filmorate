@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,5 +21,6 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
+    private Set<Integer> friends;
 
 }

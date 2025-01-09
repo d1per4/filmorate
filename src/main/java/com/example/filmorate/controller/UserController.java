@@ -2,53 +2,45 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.User;
+import com.example.filmorate.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private int uniqueId = 1;
+    private final UserService userService;
 
-    private final Map<Integer, User> users = new HashMap<>();
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        return userService.findAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        user.setId(getUniqueId());
-        if (user.getName() == null) {
-            user.setName(user.getEmail());
-        }
-
-        users.put(user.getId(), user);
-        return user;
+        return userService.create(user);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     public User update(@Valid @RequestBody User user) {
-        User updateUser = users.get(user.getId());
-
-        if (updateUser == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        users.put(user.getId(), updateUser);
-
-        return updateUser;
+        return userService.update(user);
     }
 
-    private int getUniqueId() {
-        return uniqueId++;
+    @PutMapping("/{id}/friends/{friend_id}")
+    public void addFriend(@PathVariable int id,
+                          @PathVariable int friend_id){
+        userService.addFriend(id, friend_id);
     }
+
 
 
 }

@@ -5,10 +5,7 @@ import com.example.filmorate.model.Film;
 import com.example.filmorate.storage.FilmStorage;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -26,14 +23,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        Film updateFilm = films.get(film.getId());
-
-        if (updateFilm == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
-
-        films.put(film.getId(), updateFilm);
-        return updateFilm;
+        films.put(film.getId(), film);
+        return film;
     }
 
     @Override
@@ -46,7 +37,24 @@ public class InMemoryFilmStorage implements FilmStorage {
         return List.of();
     }
 
+    @Override
+    public Optional<Film> findById(int filmId){
+        return Optional.ofNullable(films.get(filmId));
+    }
+
+    @Override
+    public void addLike(int filmId, int userId) {
+        films.get(filmId).getLikes().add(userId);
+    }
+
+    @Override
+    public void removeLike(int filmId, int userId) {
+        films.get(filmId).getLikes().remove(userId);
+    }
+
     private int getUniqueId() {
         return uniqueId++;
     }
+
+
 }
