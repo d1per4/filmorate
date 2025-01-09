@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,15 +43,21 @@ public class UserService {
     public void addFriend(int userId, int friendId){
         User user = findById(userId);
         User friendUser = findById(friendId);
-
-        if(user.getFriends().contains(friendUser.getId())) {
-            System.out.println("Пользователь уже добавлен в друзья");
+        if(!(user.getFriends().contains(friendId))){
+            user.getFriends().add(friendUser.getId());
+            friendUser.getFriends().add(user.getId());
+            update(user);
+            update(friendUser);
+        } else {
+            throw new IllegalArgumentException("Пользователь уже в друзьях");
         }
 
-        user.getFriends().add(friendUser.getId());
     }
 
     public List<User> findAllFriends(int userId) {
-        return null;
+        return findById(userId).getFriends()
+                .stream()
+                .map(this::findById)
+                .toList();
     }
 }

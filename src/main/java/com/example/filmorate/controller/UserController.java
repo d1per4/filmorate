@@ -41,6 +41,11 @@ public class UserController {
         userService.addFriend(id, friend_id);
     }
 
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriends(@PathVariable int id){
+        return userService.findAllFriends(id);
+    }
+
 
 
 }
