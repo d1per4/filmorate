@@ -1,16 +1,11 @@
 package com.example.filmorate.controller;
 
-import com.example.filmorate.exception.LocalDateException;
-import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.service.FilmService;
-import com.example.filmorate.storage.FilmStorage;
-import com.example.filmorate.storage.impl.InMemoryFilmStorage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -35,20 +30,20 @@ public class FilmController {
         return filmService.update(film);
     }
 
-    @PutMapping("/{film_id}/like/{id}")
-    public void addLike(@PathVariable int film_id,
+    @PutMapping("/{filmId}/like/{id}")
+    public void addLike(@PathVariable int filmId,
                         @PathVariable int id){
-        filmService.addLike(film_id, id);
+        filmService.addLike(filmId, id);
     }
 
-    @DeleteMapping("/{film_id}/like/{id}")
-    public void removeLike(@PathVariable int film_id,
+    @DeleteMapping("/{filmId}/like/{id}")
+    public void removeLike(@PathVariable int filmId,
                            @PathVariable int id){
-        filmService.removeLike(film_id, id);
+        filmService.removeLike(filmId, id);
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(required = false) Integer count){
+    public List<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count){
         return filmService.getPopularFilms(count);
     }
 

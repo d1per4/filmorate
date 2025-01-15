@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
     private final UserStorage userStorage;
 
     public Collection<User> findAll(){
