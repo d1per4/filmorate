@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -23,7 +24,9 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
-    private Set<Integer> likes = new HashSet<>();
+    private Integer mpa;
+    private Set<Genre> genres;
+
 
 }
 

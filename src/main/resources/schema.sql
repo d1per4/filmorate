@@ -9,13 +9,13 @@ drop table if exists friends cascade;
 
 create table if not exists mpa
 (
-    id       serial primary key,
+    id       identity primary key,
     name_mpa varchar(50) not null
 );
 
 create table if not exists films
 (
-    id           serial primary key,
+    id           identity primary key,
     name         varchar(255) not null,
     description  varchar(200),
     release_date date,
@@ -26,7 +26,7 @@ create table if not exists films
 
 create table if not exists users
 (
-    id       serial primary key,
+    id       identity primary key,
     email    varchar(50),
     login    varchar(100) not null,
     name     varchar(50),
@@ -44,7 +44,7 @@ create table if not exists likes
 
 create table if not exists genres
 (
-    id         serial primary key,
+    id         identity primary key,
     name_genre varchar(50) not null
 );
 

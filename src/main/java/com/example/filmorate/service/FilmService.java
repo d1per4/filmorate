@@ -16,48 +16,53 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmStorage filmDbStorage;
+    private final UserStorage userDbStorage;
 
     public Film create(Film film){
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new LocalDateException("Дата не может быть раньше 28 декабря 1895 года");
         }
-        return filmStorage.create(film);
+        return filmDbStorage.create(film);
     }
 
     public Collection<Film> findAll(){
-        return filmStorage.findAll();
+        return filmDbStorage.findAll();
     }
 
     public Film update(Film film){
-        findById(film.getId());
-        return filmStorage.update(film);
+        int updatedRows = filmDbStorage.update(film);
+
+        if (updatedRows == 0) {
+            throw new NotFoundException("Фильм не найден");
+        }
+
+        return film;
     }
 
     public Film findById(int filmId){
-        return filmStorage.findById(filmId)
+        return filmDbStorage.findById(filmId)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
     }
 
     public void addLike(int filmId, int userId){
         Film film = findById(filmId);
-        User user = userStorage.findById(userId)
+        User user = userDbStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        filmStorage.addLike(film.getId(), user.getId());
+        filmDbStorage.addLike(film.getId(), user.getId());
     }
 
     public void removeLike(int filmId, int userId){
         Film film = findById(filmId);
-        User user = userStorage.findById(userId)
+        User user = userDbStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        filmStorage.removeLike(film.getId(), user.getId());
+        filmDbStorage.removeLike(film.getId(), user.getId());
     }
 
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmStorage.getPopularFilms(count);
+        return filmDbStorage.getPopularFilms(count);
     }
 }
