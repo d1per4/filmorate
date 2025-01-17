@@ -1,6 +1,7 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.Mpa;
 import com.example.filmorate.service.FilmService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,10 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 
+    @PostMapping("/mpa")
+    public void addMpa(String name){
+        filmService.addMpa(name);
+    }
 
 
 }

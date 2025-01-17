@@ -1,6 +1,7 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.exception.NotFoundException;
+import com.example.filmorate.model.Mpa;
 import com.example.filmorate.model.User;
 import com.example.filmorate.service.UserService;
 import jakarta.validation.Valid;
@@ -58,5 +59,6 @@ public class UserController {
                                        @PathVariable int otherId){
         return userService.getCommonFriends(id, otherId);
     }
+
 
 }

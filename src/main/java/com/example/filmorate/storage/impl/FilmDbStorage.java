@@ -20,6 +20,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
+
+        String sql = "INSERT INTO MPA (NAME_MPA) VALUES (?)";
+        jdbcTemplate.update(sql, film.getMpa().getName());
+
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILMS")
                 .usingGeneratedKeyColumns("ID");
@@ -28,7 +32,8 @@ public class FilmDbStorage implements FilmStorage {
                 "NAME", film.getName(),
                 "DESCRIPTION", film.getDescription(),
                 "RELEASE_DATE", film.getReleaseDate(),
-                "DURATION", film.getDuration()
+                "DURATION", film.getDuration(),
+                "MPA_ID", film.getMpa().getId()
         );
 
         int id = insert.executeAndReturnKey(params).intValue();
@@ -90,8 +95,9 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("DESCRIPTION"))
                 .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                 .duration(rs.getInt("DURATION"))
-                .mpa(rs.getInt("MPA_ID"))
+                .mpa(rs.getObject("MPA_ID", Mpa.class))
                 .build();
     }
+
 
 }

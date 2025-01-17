@@ -10,7 +10,7 @@ drop table if exists friends cascade;
 create table if not exists mpa
 (
     id       identity primary key,
-    name_mpa varchar(50) not null
+    name_mpa varchar(50)
 );
 
 create table if not exists films

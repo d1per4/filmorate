@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Builder
@@ -24,7 +23,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
-    private Integer mpa;
+    private Mpa mpa;
     private Set<Genre> genres;
 
 
