@@ -61,6 +61,10 @@ public class FilmService {
         filmDbStorage.removeLike(film.getId(), user.getId());
     }
 
+    public void addMpa(String name){
+        filmDbStorage.addMpa(name);
+    }
+
 
     public List<Film> getPopularFilms(Integer count) {
         return filmDbStorage.getPopularFilms(count);

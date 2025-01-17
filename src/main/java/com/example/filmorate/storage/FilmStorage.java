@@ -19,6 +19,8 @@ public interface FilmStorage {
 
     Optional<Film> findById(int filmId);
 
+    void addMpa(String mpaName);
+
     void addLike(int filmId, int userId);
 
     void removeLike(int filmId, int userId);

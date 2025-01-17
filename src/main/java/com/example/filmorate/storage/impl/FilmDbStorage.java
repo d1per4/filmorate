@@ -1,6 +1,7 @@
 package com.example.filmorate.storage.impl;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.Mpa;
 import com.example.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,6 +63,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void addMpa(String mpaName){
+        String sql = "INSERT INTO MPA (NAME_MPA) VALUES (?)";
+        jdbcTemplate.update(sql, mpaName);
+    }
+
+    @Override
     public void addLike(int filmId, int userId) {
 
     }
@@ -83,6 +90,7 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("DESCRIPTION"))
                 .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                 .duration(rs.getInt("DURATION"))
+                .mpa(rs.getInt("MPA_ID"))
                 .build();
     }
 
