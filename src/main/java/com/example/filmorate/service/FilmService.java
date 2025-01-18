@@ -1,8 +1,11 @@
 package com.example.filmorate.service;
 
+import com.example.filmorate.exception.InvalidMpaException;
 import com.example.filmorate.exception.LocalDateException;
 import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.Genre;
+import com.example.filmorate.model.Mpa;
 import com.example.filmorate.model.User;
 import com.example.filmorate.storage.FilmStorage;
 import com.example.filmorate.storage.UserStorage;
@@ -23,6 +26,8 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new LocalDateException("Дата не может быть раньше 28 декабря 1895 года");
         }
+
+
         return filmDbStorage.create(film);
     }
 
@@ -61,12 +66,25 @@ public class FilmService {
         filmDbStorage.removeLike(film.getId(), user.getId());
     }
 
-    public void addMpa(String name){
-        filmDbStorage.addMpa(name);
-    }
-
-
     public List<Film> getPopularFilms(Integer count) {
         return filmDbStorage.getPopularFilms(count);
+    }
+
+    public List<Mpa> getMpa() {
+        return filmDbStorage.getMpa();
+    }
+
+    public Mpa getMpaById(int mpaId) {
+        return filmDbStorage.getMpaById(mpaId)
+                .orElseThrow(() -> new NotFoundException("MPA не найден."));
+    }
+
+    public List<Genre> getGenres(){
+        return filmDbStorage.getGenres();
+    }
+
+    public Genre getGenresById(int genreId) {
+        return filmDbStorage.getGenreById(genreId)
+                .orElseThrow(() -> new NotFoundException("Жанр не найден"));
     }
 }

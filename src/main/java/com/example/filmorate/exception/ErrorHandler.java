@@ -24,4 +24,16 @@ public class ErrorHandler {
     public ErrorResponse handleUserExists(UserAlreadyExistsException e){
         return new ErrorResponse("Пользователь уже существует", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidMpa(InvalidMpaException e){
+        return new ErrorResponse("MPA ID указан неверно", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidGenre(InvalidGenreException e){
+        return new ErrorResponse("Genre ID указан неверно", e.getMessage());
+    }
 }

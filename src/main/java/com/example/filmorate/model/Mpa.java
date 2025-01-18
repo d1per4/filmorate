@@ -1,11 +1,8 @@
 package com.example.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor

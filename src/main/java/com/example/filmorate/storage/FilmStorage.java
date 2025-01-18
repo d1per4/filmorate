@@ -1,6 +1,8 @@
 package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.Genre;
+import com.example.filmorate.model.Mpa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -19,11 +21,17 @@ public interface FilmStorage {
 
     Optional<Film> findById(int filmId);
 
-    void addMpa(String mpaName);
-
     void addLike(int filmId, int userId);
 
     void removeLike(int filmId, int userId);
 
     List<Film> getPopularFilms(Integer count);
+
+    List<Mpa> getMpa();
+
+    Optional<Mpa> getMpaById(int mpaId);
+
+    List<Genre> getGenres();
+
+    Optional<Genre> getGenreById(int genreId);
 }

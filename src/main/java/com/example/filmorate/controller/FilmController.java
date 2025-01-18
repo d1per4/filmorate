@@ -1,57 +1,75 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.Genre;
 import com.example.filmorate.model.Mpa;
 import com.example.filmorate.service.FilmService;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
-@RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
 
     private final FilmService filmService;
 
-    @GetMapping
+    @GetMapping("/films")
     public Collection<Film> findAll() {
         return filmService.findAll();
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
     }
 
-    @PutMapping("/{filmId}/like/{id}")
+    @PutMapping("/films/{filmId}/like/{id}")
     public void addLike(@PathVariable int filmId,
                         @PathVariable int id){
         filmService.addLike(filmId, id);
     }
 
-    @DeleteMapping("/{filmId}/like/{id}")
+    @DeleteMapping("/films/{filmId}/like/{id}")
     public void removeLike(@PathVariable int filmId,
                            @PathVariable int id){
         filmService.removeLike(filmId, id);
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/films/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count){
         return filmService.getPopularFilms(count);
     }
 
-    @PostMapping("/mpa")
-    public void addMpa(String name){
-        filmService.addMpa(name);
+    @GetMapping("/mpa")
+    public List<Mpa> getMpa(){
+        return filmService.getMpa();
     }
+
+    @GetMapping("/mpa/{mpaId}")
+    public Mpa getMpaById(@PathVariable int mpaId){
+        return filmService.getMpaById(mpaId);
+    }
+
+    @GetMapping("/genres")
+    public List<Genre> getGenres(){
+        return filmService.getGenres();
+    }
+
+    @GetMapping("/genres/{id}")
+    public Genre getGenresById(@PathVariable int id){
+        return filmService.getGenresById(id);
+    }
+
+
 
 
 }
