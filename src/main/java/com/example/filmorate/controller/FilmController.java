@@ -69,6 +69,11 @@ public class FilmController {
         return filmService.getGenresById(id);
     }
 
+    @GetMapping("/films/{id}")
+    public Film getFilmWithGenre(@PathVariable int id){
+        return filmService.getFilmWithGenre(id);
+    }
+
 
 
 

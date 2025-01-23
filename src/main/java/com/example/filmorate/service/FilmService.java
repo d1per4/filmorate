@@ -87,4 +87,9 @@ public class FilmService {
         return filmDbStorage.getGenreById(genreId)
                 .orElseThrow(() -> new NotFoundException("Жанр не найден"));
     }
+
+    public Film getFilmWithGenre(int id) {
+        return filmDbStorage.findById(id).orElseThrow(() ->
+                new NotFoundException("Фильм не найден"));
+    }
 }

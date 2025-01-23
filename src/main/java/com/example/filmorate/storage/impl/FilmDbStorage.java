@@ -2,6 +2,7 @@ package com.example.filmorate.storage.impl;
 
 import com.example.filmorate.exception.InvalidGenreException;
 import com.example.filmorate.exception.InvalidMpaException;
+import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.Genre;
 import com.example.filmorate.model.Mpa;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -30,12 +32,6 @@ public class FilmDbStorage implements FilmStorage {
             throw new InvalidMpaException("MPA ID " + mpaId + " не существует.");
         }
 
-        for (Genre genre : film.getGenres()) {
-            if (!genreExists(genre.getId())) {
-                throw new InvalidGenreException("Genre ID " + genre.getId() + " не существует");
-            }
-        }
-
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILMS")
                 .usingGeneratedKeyColumns("ID");
@@ -45,15 +41,27 @@ public class FilmDbStorage implements FilmStorage {
                 "DESCRIPTION", film.getDescription(),
                 "RELEASE_DATE", film.getReleaseDate(),
                 "DURATION", film.getDuration(),
-                "MPA_ID", mpaId
+                "MPA_ID", film.getMpa().getId()
         );
 
         int id = insert.executeAndReturnKey(params).intValue();
         film.setId(id);
 
-        Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-        sortedGenres.addAll(film.getGenres());
-        film.setGenres(sortedGenres);
+        try {
+            Set<Genre> collect = film.getGenres().stream()
+                    .map(genre -> getGenreById(genre.getId())
+                            .orElseThrow(() ->
+                                    new InvalidGenreException("Жанр " + genre.getId() + " не существует")))
+                    .collect(Collectors.toSet());
+
+            Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+            sortedGenres.addAll(collect);
+            film.setGenres(sortedGenres);
+
+            addGenresToFilm(id, sortedGenres);
+        } catch (NullPointerException e) {
+            System.out.println("Не найдены жанры");
+        }
 
         return film;
     }
@@ -78,7 +86,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> findById(int filmId) {
-        String sql = "SELECT * FROM FILMS WHERE ID = ?";
+        String sql = """
+                SELECT F."ID", "NAME", "DESCRIPTION", "RELEASE_DATE", "DURATION", "MPA_ID", M.NAME_MPA FROM FILMS F 
+                JOIN MPA M ON F.MPA_ID = M.ID 
+                WHERE F.ID = ?
+                """;
         return jdbcTemplate.query(sql, this::mapRow, filmId)
                 .stream()
                 .findFirst();
@@ -99,11 +111,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilms(Integer count) {
         String sql = """
-                SELECT FILM_ID, COUNT(USER_ID) AS FILM_LIKES
-                FROM LIKES
-                group by FILM_ID
-                HAVING COUNT(USER_ID) > ?
-                ORDER BY FILM_LIKES DESC
+                SELECT F.ID, F.NAME, F.DESCRIPTION, F.RELEASE_DATE, F.DURATION, F.MPA_ID, COUNT(L.USER_ID) FROM FILMS F
+                LEFT JOIN LIKES L ON F."ID" = L."FILM_ID"
+                GROUP BY F.ID
+                ORDER BY COUNT(L.USER_ID) DESC
+                LIMIT ?
                 """;
         return jdbcTemplate.query(sql, this::mapRow, count);
     }
@@ -138,13 +150,20 @@ public class FilmDbStorage implements FilmStorage {
 
 
     private Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return Film.builder()
+        Film film = Film.builder()
                 .id(rs.getInt("ID"))
                 .name(rs.getString("NAME"))
                 .description(rs.getString("DESCRIPTION"))
                 .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                 .duration(rs.getInt("DURATION"))
+                .mpa(getMpaById(rs.getInt("MPA_ID"))
+                        .orElseThrow(() -> new InvalidMpaException("MPA не существует.")))
                 .build();
+
+        Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+        sortedGenres.addAll(getGenresForFilm(rs.getInt("ID")));
+        film.setGenres(sortedGenres);
+        return film;
     }
 
     private Mpa mapRowForMpa(ResultSet rs, int rowNum) throws SQLException {
@@ -167,10 +186,31 @@ public class FilmDbStorage implements FilmStorage {
         return count != null && count > 0;
     }
 
-    private boolean genreExists(Integer genreId) {
-        String sql = "SELECT COUNT(*) FROM GENRES WHERE ID = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, genreId);
-        return count != null && count > 0;
+
+    private Set<Genre> getGenresForFilm(int filmId){
+        String sql = """
+                SELECT G.ID, G.NAME_GENRE FROM GENRES G
+                JOIN FILM_GENRES FG ON G.ID = FG.GENRE_ID
+                WHERE FG.FILM_ID = ?
+                ORDER BY G.ID DESC
+                """;
+        return new HashSet<>(jdbcTemplate.query(sql, this::mapRowForGenre, filmId));
+    }
+
+    private void addGenresToFilm(int filmId, Set<Genre> genres) {
+        if (genres == null || genres.isEmpty()) {
+            return; // Если жанры отсутствуют, ничего не делаем
+        }
+
+        String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+
+        // Подготовка данных для batchUpdate
+        List<Object[]> batchArgs = genres.stream()
+                .map(genre -> new Object[]{filmId, genre.getId()})
+                .toList();
+
+        // Выполняем batchUpdate
+        jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
     
