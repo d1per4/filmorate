@@ -199,17 +199,14 @@ public class FilmDbStorage implements FilmStorage {
 
     private void addGenresToFilm(int filmId, Set<Genre> genres) {
         if (genres == null || genres.isEmpty()) {
-            return; // Если жанры отсутствуют, ничего не делаем
+            return;
         }
-
         String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
-        // Подготовка данных для batchUpdate
         List<Object[]> batchArgs = genres.stream()
                 .map(genre -> new Object[]{filmId, genre.getId()})
                 .toList();
 
-        // Выполняем batchUpdate
         jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
