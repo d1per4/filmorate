@@ -1,9 +1,8 @@
 package com.example.filmorate.service;
 
 import com.example.filmorate.exception.NotFoundException;
-import com.example.filmorate.exception.UserAlreadyExistsException;
 import com.example.filmorate.model.User;
-import com.example.filmorate.storage.impl.UserDbStorage;
+import com.example.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserDbStorage userDbStorage;
+    private final UserStorage userDbStorage;
 
     public Collection<User> findAll(){
         return userDbStorage.findAll();

@@ -1,7 +1,5 @@
 package com.example.filmorate.controller;
 
-import com.example.filmorate.exception.NotFoundException;
-import com.example.filmorate.model.Mpa;
 import com.example.filmorate.model.User;
 import com.example.filmorate.service.UserService;
 import jakarta.validation.Valid;
@@ -9,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")

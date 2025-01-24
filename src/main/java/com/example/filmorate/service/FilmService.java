@@ -1,11 +1,8 @@
 package com.example.filmorate.service;
 
-import com.example.filmorate.exception.InvalidMpaException;
 import com.example.filmorate.exception.LocalDateException;
 import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
-import com.example.filmorate.model.Genre;
-import com.example.filmorate.model.Mpa;
 import com.example.filmorate.model.User;
 import com.example.filmorate.storage.FilmStorage;
 import com.example.filmorate.storage.UserStorage;
@@ -70,23 +67,6 @@ public class FilmService {
         return filmDbStorage.getPopularFilms(count);
     }
 
-    public List<Mpa> getMpa() {
-        return filmDbStorage.getMpa();
-    }
-
-    public Mpa getMpaById(int mpaId) {
-        return filmDbStorage.getMpaById(mpaId)
-                .orElseThrow(() -> new NotFoundException("MPA не найден."));
-    }
-
-    public List<Genre> getGenres(){
-        return filmDbStorage.getGenres();
-    }
-
-    public Genre getGenresById(int genreId) {
-        return filmDbStorage.getGenreById(genreId)
-                .orElseThrow(() -> new NotFoundException("Жанр не найден"));
-    }
 
     public Film getFilmWithGenre(int id) {
         return filmDbStorage.findById(id).orElseThrow(() ->

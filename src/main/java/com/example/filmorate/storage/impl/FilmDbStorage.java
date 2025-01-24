@@ -2,11 +2,11 @@ package com.example.filmorate.storage.impl;
 
 import com.example.filmorate.exception.InvalidGenreException;
 import com.example.filmorate.exception.InvalidMpaException;
-import com.example.filmorate.exception.NotFoundException;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.Genre;
-import com.example.filmorate.model.Mpa;
 import com.example.filmorate.storage.FilmStorage;
+import com.example.filmorate.storage.GenreStorage;
+import com.example.filmorate.storage.MpaStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -22,13 +22,15 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final GenreStorage genreDbStorage;
+    private final MpaStorage mpaDbStorage;
 
     @Override
     public Film create(Film film) {
 
         Integer mpaId = film.getMpa().getId();
 
-        if (!mpaExists(mpaId)) {
+        if (!mpaDbStorage.mpaExists(mpaId)) {
             throw new InvalidMpaException("MPA ID " + mpaId + " не существует.");
         }
 
@@ -47,9 +49,9 @@ public class FilmDbStorage implements FilmStorage {
         int id = insert.executeAndReturnKey(params).intValue();
         film.setId(id);
 
-        try {
+        if(film.getGenres() != null) {
             Set<Genre> collect = film.getGenres().stream()
-                    .map(genre -> getGenreById(genre.getId())
+                    .map(genre -> genreDbStorage.getGenreById(genre.getId())
                             .orElseThrow(() ->
                                     new InvalidGenreException("Жанр " + genre.getId() + " не существует")))
                     .collect(Collectors.toSet());
@@ -58,9 +60,7 @@ public class FilmDbStorage implements FilmStorage {
             sortedGenres.addAll(collect);
             film.setGenres(sortedGenres);
 
-            addGenresToFilm(id, sortedGenres);
-        } catch (NullPointerException e) {
-            System.out.println("Не найдены жанры");
+            genreDbStorage.addGenresToFilm(id, sortedGenres);
         }
 
         return film;
@@ -87,8 +87,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Optional<Film> findById(int filmId) {
         String sql = """
-                SELECT F."ID", "NAME", "DESCRIPTION", "RELEASE_DATE", "DURATION", "MPA_ID", M.NAME_MPA FROM FILMS F 
-                JOIN MPA M ON F.MPA_ID = M.ID 
+                SELECT F."ID", "NAME", "DESCRIPTION", "RELEASE_DATE", "DURATION", "MPA_ID", M.NAME_MPA FROM FILMS F
+                JOIN MPA M ON F.MPA_ID = M.ID
                 WHERE F.ID = ?
                 """;
         return jdbcTemplate.query(sql, this::mapRow, filmId)
@@ -120,34 +120,6 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, this::mapRow, count);
     }
 
-    @Override
-    public List<Mpa> getMpa() {
-        String sql = "SELECT * FROM MPA";
-        return jdbcTemplate.query(sql, this::mapRowForMpa);
-    }
-
-    @Override
-    public Optional<Mpa> getMpaById(int mpaId) {
-        String sql = "SELECT * FROM MPA WHERE ID = ?";
-        return jdbcTemplate.query(sql, this::mapRowForMpa, mpaId)
-                .stream()
-                .findFirst();
-    }
-
-    @Override
-    public List<Genre> getGenres() {
-        String sql = "SELECT * FROM GENRES";
-        return jdbcTemplate.query(sql, this::mapRowForGenre);
-    }
-
-    @Override
-    public Optional<Genre> getGenreById(int genreId) {
-        String sql = "SELECT * FROM GENRES WHERE ID = ?";
-        return jdbcTemplate.query(sql, this::mapRowForGenre, genreId)
-                .stream()
-                .findFirst();
-    }
-
 
     private Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         Film film = Film.builder()
@@ -156,61 +128,21 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("DESCRIPTION"))
                 .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                 .duration(rs.getInt("DURATION"))
-                .mpa(getMpaById(rs.getInt("MPA_ID"))
+                .mpa(mpaDbStorage.getMpaById(rs.getInt("MPA_ID"))
                         .orElseThrow(() -> new InvalidMpaException("MPA не существует.")))
                 .build();
 
         Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-        sortedGenres.addAll(getGenresForFilm(rs.getInt("ID")));
+        sortedGenres.addAll(genreDbStorage.getGenresForFilm(rs.getInt("ID")));
         film.setGenres(sortedGenres);
         return film;
     }
 
-    private Mpa mapRowForMpa(ResultSet rs, int rowNum) throws SQLException {
-        return Mpa.builder()
-                .id(rs.getInt("ID"))
-                .name(rs.getString("NAME_MPA"))
-                .build();
-    }
-
-    private Genre mapRowForGenre(ResultSet rs, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(rs.getInt("ID"))
-                .name(rs.getString("NAME_GENRE"))
-                .build();
-    }
-
-    private boolean mpaExists(Integer mpaId) {
-        String sql = "SELECT COUNT(*) FROM MPA WHERE ID = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, mpaId);
-        return count != null && count > 0;
-    }
 
 
-    private Set<Genre> getGenresForFilm(int filmId){
-        String sql = """
-                SELECT G.ID, G.NAME_GENRE FROM GENRES G
-                JOIN FILM_GENRES FG ON G.ID = FG.GENRE_ID
-                WHERE FG.FILM_ID = ?
-                ORDER BY G.ID DESC
-                """;
-        return new HashSet<>(jdbcTemplate.query(sql, this::mapRowForGenre, filmId));
-    }
 
-    private void addGenresToFilm(int filmId, Set<Genre> genres) {
-        if (genres == null || genres.isEmpty()) {
-            return;
-        }
-        String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
-        List<Object[]> batchArgs = genres.stream()
-                .map(genre -> new Object[]{filmId, genre.getId()})
-                .toList();
 
-        jdbcTemplate.batchUpdate(sql, batchArgs);
-    }
-
-    
 
 
 }
